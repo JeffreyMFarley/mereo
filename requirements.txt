@@ -1,5 +1,7 @@
 mock
 nose
 nose_parameterized
+numpy
 svgwrite
+svgpathtools
 configargparse
