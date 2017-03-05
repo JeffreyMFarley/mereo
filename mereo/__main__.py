@@ -48,6 +48,17 @@ def formatPoint(point):
     return '{0:10.3f}, {1:10.3f}'.format(point.real, point.imag)
 
 
+def annotation(part):
+    s = '_'.join([
+        '{}{}'.format(k, part[k]) for k in ['x', 'y', 'z'] if part[k]
+    ])
+
+    if part['other']:
+        s += '_' + part['other'] if s else part['other']
+
+    return '_' + s if s else ''
+
+
 def name(part):
     return ', '.join([
         '{}={}'.format(k, part[k]) for k in ['x', 'y', 'z', 'other']
@@ -76,6 +87,31 @@ def toConsole(part):
             raise TypeError("seg must be a path segment.")
 
 
+def quantize(part):
+    from svgpathtools import parse_path, Path, Line, CubicBezier
+
+    path = parse_path(part['d'])
+    newPath = Path()
+    for seg in path:
+        if isinstance(seg, Line):
+            newSeg = Line(
+                complex(round(seg.start.real), round(seg.start.imag)),
+                complex(round(seg.end.real), round(seg.end.imag))
+            )
+            newPath.append(newSeg)
+
+        elif isinstance(seg, CubicBezier):
+            newSeg = CubicBezier(
+                complex(round(seg.start.real), round(seg.start.imag)),
+                complex(round(seg.control1.real), round(seg.control1.imag)),
+                complex(round(seg.control2.real), round(seg.control2.imag)),
+                complex(round(seg.end.real), round(seg.end.imag))
+            )
+            newPath.append(newSeg)
+
+    part['d'] = newPath.d()
+
+
 # -----------------------------------------------------------------------------
 # Inventory Operations
 
@@ -83,6 +119,7 @@ def quantizeAll(inventory):
     for key, parts in inventory.items():
         print(key)
         for part in parts:
+            quantize(part)
             toConsole(part)
 
 
@@ -104,13 +141,26 @@ def saveInventory(inventory, filename):
 # -----------------------------------------------------------------------------
 # Inventory -> SVG
 
-def writeSvg(entries):
-    from svgpathtools import wsvg
-    # wsvg(paths,
-    #      attributes=attributes,
-    #      svg_attributes=svg_attributes,
-    #      filename='/Users/farleyj/Desktop/output.svg')
-    pass
+def writeSvg(subset, filename):
+    from svgpathtools import wsvg, parse_path
+
+    paths = []
+    attributes = []
+
+    for key, parts in subset.items():
+        for part in parts:
+            path = parse_path(part['d'])
+            paths.append(path)
+            att = {
+                'id': key + annotation(part),
+                'stroke-width': 2,
+                'stroke': '#ff0000',
+                'fill': 'none',
+                'opacity': 1
+            }
+            attributes.append(att)
+
+    wsvg(paths, attributes=attributes, filename=filename)
 
 # -----------------------------------------------------------------------------
 # Main
@@ -120,3 +170,4 @@ if __name__ == "__main__":
     updateFromSvg(inv, INPUT_SVG)
     quantizeAll(inv)
     saveInventory(inv, INVENTORY_FILE)
+    writeSvg(inv, '/Users/farleyj/Desktop/output.svg')
