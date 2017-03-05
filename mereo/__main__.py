@@ -2,25 +2,32 @@ from __future__ import print_function
 import os
 import sys
 
+INPUT_SVG = '/Users/farleyj/Desktop/Bernard.svg'
+INVENTORY_FILE = '/Users/farleyj/Desktop/inventory.json'
 
-def extractAnnotations(entry, annotations):
+# -----------------------------------------------------------------------------
+# SVG -> Inventory
+
+
+def extractAnnotations(part, annotations):
     for annot in annotations:
         for dim in ['x', 'y', 'z']:
             if dim in annot:
                 try:
-                    entry[dim] = int(annot[1:])
+                    part[dim] = int(annot[1:])
                 except:
-                    entry['other'] = annot
+                    part['other'] = annot
 
 
-def buildInventory(attributes):
-    from collections import defaultdict
+def updateFromSvg(inventory, filename):
+    from svgpathtools import svg2paths2
 
-    r = defaultdict(list)
+    _, attributes, _ = svg2paths2(filename)
+
     for i, a in enumerate(attributes):
         if 'id' in a:
             annotations = a['id'].split('_')
-            entry = {
+            part = {
                 'd': a['d'],
                 'x': 0,
                 'y': 0,
@@ -28,27 +35,42 @@ def buildInventory(attributes):
                 'other': ''
             }
 
-            extractAnnotations(entry, annotations[1:])
-            r[annotations[0]].append(entry)
+            extractAnnotations(part, annotations[1:])
+            inventory[annotations[0]].append(part)
 
-    return r
+    return inventory
 
 
-if __name__ == "__main__":
-    from svgpathtools import svg2paths2, wsvg
+# -----------------------------------------------------------------------------
+# Inventory
+
+def loadInventory(filename):
+    from collections import defaultdict
+    return defaultdict(list)
+
+
+def saveInventory(inventory, filename):
     import json
-
-    _, attributes, _ = svg2paths2(
-        '/Users/farleyj/Desktop/Bernard.svg'
-    )
-
-    inventory = buildInventory(attributes)
-
-    with open('/Users/farleyj/Desktop/inventory.json', 'w') as f:
+    with open(filename, 'w') as f:
         json.dump(inventory, f, sort_keys=True, indent=2,
                   separators=(',', ': '))
 
+
+# -----------------------------------------------------------------------------
+# Inventory -> SVG
+
+def writeSvg(entries):
+    from svgpathtools import wsvg
     # wsvg(paths,
     #      attributes=attributes,
     #      svg_attributes=svg_attributes,
     #      filename='/Users/farleyj/Desktop/output.svg')
+    pass
+
+# -----------------------------------------------------------------------------
+# Main
+
+if __name__ == "__main__":
+    inv = loadInventory(INVENTORY_FILE)
+    updateFromSvg(inv, INPUT_SVG)
+    saveInventory(inv, INVENTORY_FILE)
