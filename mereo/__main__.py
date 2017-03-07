@@ -2,8 +2,9 @@ from __future__ import print_function
 import os
 import sys
 
-INPUT_SVG = '/Users/farleyj/Desktop/Bernard.svg'
-INVENTORY_FILE = '/Users/farleyj/Desktop/inventory.json'
+FOLDER = '/Users/farleyj/Desktop/Bernard/'
+INPUT_SVG = os.path.join(FOLDER, 'Bernard.svg')
+INVENTORY_FILE = os.path.join(FOLDER, 'inventory.json')
 
 
 # -----------------------------------------------------------------------------
@@ -115,10 +116,23 @@ def quantize(part):
 # -----------------------------------------------------------------------------
 # Inventory Operations
 
+ORDER = [
+    'shoulder-right', 'shoulder-left',
+    'upper-arm-right', 'upper-arm-left',
+    'hips',
+    'upper-leg-right', 'upper-leg-left',
+    'lower-leg-right', 'lower-leg-left',
+    'foot-right', 'foot-left',
+    'trunk',
+    'lower-arm-right', 'lower-arm-left',
+    'hand-right', 'hand-left'
+]
+
+
 def quantizeAll(inventory):
-    for key, parts in inventory.items():
+    for key in ORDER:
         print(key)
-        for part in parts:
+        for part in inventory[key]:
             quantize(part)
             toConsole(part)
 
@@ -127,8 +141,14 @@ def quantizeAll(inventory):
 # Inventory I/O
 
 def loadInventory(filename):
+    import json
     from collections import defaultdict
-    return defaultdict(list)
+    try:
+        with open(filename, 'r') as f:
+            return json.load(f)
+    except IOError:
+        # no such file, create an empty dictionary
+        return defaultdict(list)
 
 
 def saveInventory(inventory, filename):
@@ -146,28 +166,35 @@ def writeSvg(subset, filename):
 
     paths = []
     attributes = []
+    svg_attributes = {
+        'width': 2000,
+        'height': 1800
+    }
 
-    for key, parts in subset.items():
-        for part in parts:
-            path = parse_path(part['d'])
-            paths.append(path)
-            att = {
-                'id': key + annotation(part),
-                'stroke-width': 2,
-                'stroke': '#ff0000',
-                'fill': 'none',
-                'opacity': 1
-            }
-            attributes.append(att)
+    for key in ORDER:
+        if key in subset:
+            for part in subset[key]:
+                path = parse_path(part['d'])
+                paths.append(path)
+                att = {
+                    'id': key + annotation(part),
+                    'stroke-width': 2,
+                    'stroke': '#ff0000' if not part['z'] else '#00ff00',
+                    'fill': 'none',
+                    'opacity': 1
+                }
+                attributes.append(att)
 
-    wsvg(paths, attributes=attributes, filename=filename)
+    wsvg(paths, attributes=attributes, svg_attributes=svg_attributes,
+         filename=filename)
 
 # -----------------------------------------------------------------------------
 # Main
 
 if __name__ == "__main__":
     inv = loadInventory(INVENTORY_FILE)
-    updateFromSvg(inv, INPUT_SVG)
+    # updateFromSvg(inv, INPUT_SVG)
     quantizeAll(inv)
-    saveInventory(inv, INVENTORY_FILE)
-    writeSvg(inv, '/Users/farleyj/Desktop/output.svg')
+    # saveInventory(inv, INVENTORY_FILE)
+    outfile = os.path.join(FOLDER, 'quantized.svg')
+    writeSvg(inv, outfile)
