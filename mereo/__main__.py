@@ -117,6 +117,11 @@ def quantize(part):
 # Inventory Operations
 
 ORDER = [
+    'head',
+    'eye-left', 'eye-right',
+    'nose', 'mouth',
+    'hair',
+    'head-cover',
     'shoulder-right', 'shoulder-left',
     'upper-arm-right', 'upper-arm-left',
     'hips',
@@ -131,10 +136,11 @@ ORDER = [
 
 def quantizeAll(inventory):
     for key in ORDER:
-        print(key)
-        for part in inventory[key]:
-            quantize(part)
-            toConsole(part)
+        if key in inventory:
+            print(key)
+            for part in inventory[key]:
+                quantize(part)
+                toConsole(part)
 
 
 # -----------------------------------------------------------------------------
@@ -161,6 +167,16 @@ def saveInventory(inventory, filename):
 # -----------------------------------------------------------------------------
 # Inventory -> SVG
 
+def encodeColor(key, part):
+    rgb = [255, 16, 16]
+    rgb[0] -= ORDER.index(key) + 1
+    rgb[1] -= (part['y'] / 30)
+    rgb[2] -= (part['z'] / 30)
+
+    asHex = '#{0:02x}{1:02x}{2:02x}'.format(*rgb)
+    return asHex
+
+
 def writeSvg(subset, filename):
     from svgpathtools import wsvg, parse_path
 
@@ -179,7 +195,7 @@ def writeSvg(subset, filename):
                 att = {
                     'id': key + annotation(part),
                     'stroke-width': 2,
-                    'stroke': '#ff0000' if not part['z'] else '#00ff00',
+                    'stroke': encodeColor(key, part),
                     'fill': 'none',
                     'opacity': 1
                 }
