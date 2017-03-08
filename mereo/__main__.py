@@ -207,15 +207,34 @@ def writeSvg(subset, filename):
     wsvg(paths, attributes=attributes, svg_attributes=svg_attributes,
          filename=filename)
 
+
+# -----------------------------------------------------------------------------
+# Actions
+
+def createInventory(inventoryPath, svgPath, quantize=True):
+    from collections import defaultdict
+    inv = defaultdict(list)
+    updateFromSvg(inv, svgPath)
+    if quantize:
+        quantizeAll(inv)
+    saveInventory(inv, inventoryPath)
+
+
+def updateInventory(inventoryPath, svgPath, quantize=True):
+    inv = loadInventory(inventoryPath)
+    updateFromSvg(inv, svgPath)
+    if quantize:
+        quantizeAll(inv)
+    saveInventory(inv, inventoryPath)
+
+
+def writeSvg(inventoryPath, svgPath):
+    inv = loadInventory(inventoryPath)
+    # TODO select parts
+    writeSvg(inv, svgPath)
+
 # -----------------------------------------------------------------------------
 # Main
 
 if __name__ == "__main__":
     inventoryPath = fullPath('inventory.json')
-
-    inv = loadInventory(inventoryPath)
-    # updateFromSvg(inv, fullPath('Bernard.svg'))
-    quantizeAll(inv)
-    # saveInventory(inv, inventoryPath)
-    outfile = fullPath('quantized.svg')
-    writeSvg(inv, outfile)
