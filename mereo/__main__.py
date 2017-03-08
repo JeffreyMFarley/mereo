@@ -228,7 +228,7 @@ def updateInventory(inventoryPath, svgPath, quantize=True):
     saveInventory(inv, inventoryPath)
 
 
-def writeSvg(inventoryPath, svgPath):
+def drawInventory(inventoryPath, svgPath):
     inv = loadInventory(inventoryPath)
     # TODO select parts
     writeSvg(inv, svgPath)
