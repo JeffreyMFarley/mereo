@@ -2,9 +2,12 @@ from __future__ import print_function
 import os
 import sys
 
-FOLDER = '/Users/farleyj/Desktop/Bernard/'
-INPUT_SVG = os.path.join(FOLDER, 'Bernard.svg')
-INVENTORY_FILE = os.path.join(FOLDER, 'inventory.json')
+
+# -----------------------------------------------------------------------------
+# I/O
+
+def fullPath(fileName):
+    return os.path.join('/Users/farleyj/Desktop/Bernard/', fileName)
 
 
 # -----------------------------------------------------------------------------
@@ -208,9 +211,11 @@ def writeSvg(subset, filename):
 # Main
 
 if __name__ == "__main__":
-    inv = loadInventory(INVENTORY_FILE)
-    # updateFromSvg(inv, INPUT_SVG)
+    inventoryPath = fullPath('inventory.json')
+
+    inv = loadInventory(inventoryPath)
+    # updateFromSvg(inv, fullPath('Bernard.svg'))
     quantizeAll(inv)
-    # saveInventory(inv, INVENTORY_FILE)
-    outfile = os.path.join(FOLDER, 'quantized.svg')
+    # saveInventory(inv, inventoryPath)
+    outfile = fullPath('quantized.svg')
     writeSvg(inv, outfile)
