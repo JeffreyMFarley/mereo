@@ -91,6 +91,31 @@ def toConsole(part):
             raise TypeError("seg must be a path segment.")
 
 
+def translate(part, x, y):
+    from svgpathtools import parse_path, Path, Line, CubicBezier
+
+    path = parse_path(part['d'])
+    newPath = Path()
+    for seg in path:
+        if isinstance(seg, Line):
+            newSeg = Line(
+                complex(seg.start.real + x, seg.start.imag + y),
+                complex(seg.end.real + x, seg.end.imag + y)
+            )
+            newPath.append(newSeg)
+
+        elif isinstance(seg, CubicBezier):
+            newSeg = CubicBezier(
+                complex(seg.start.real + x, seg.start.imag + y),
+                complex(seg.control1.real + x, seg.control1.imag + y),
+                complex(seg.control2.real + x, seg.control2.imag + y),
+                complex(seg.end.real + x, seg.end.imag + y)
+            )
+            newPath.append(newSeg)
+
+    part['d'] = newPath.d()
+
+
 def quantize(part):
     from svgpathtools import parse_path, Path, Line, CubicBezier
 
@@ -144,6 +169,13 @@ def quantizeAll(inventory):
             for part in inventory[key]:
                 quantize(part)
                 toConsole(part)
+
+
+def parts(inventory):
+    for key in ORDER:
+        if key in inventory:
+            for part in inventory[key]:
+                yield key, part
 
 
 # -----------------------------------------------------------------------------
@@ -228,13 +260,46 @@ def updateInventory(inventoryPath, svgPath, quantize=True):
     saveInventory(inv, inventoryPath)
 
 
-def drawInventory(inventoryPath, svgPath):
+def drawInventory(inventoryPath, filter, svgPath):
     inv = loadInventory(inventoryPath)
     # TODO select parts
     writeSvg(inv, svgPath)
 
+
+def translatePart(inventoryPath, select, x, y):
+    inv = loadInventory(inventoryPath)
+
+    for key, part in parts(inv):
+        if select(key, part):
+            print(key)
+            toConsole(part)
+            translate(part, x, y)
+
+    path2 = fullPath('inventory-xlate-out.json')
+    saveInventory(inv, path2)
+    drawInventory(path2, None, fullPath('xlate.svg'))
+
+
 # -----------------------------------------------------------------------------
 # Main
 
+def zyyz(key, part):
+    if key == 'lower-arm-left' and part['z'] == 270:
+        return True
+
+    if key == 'upper-arm-left' and part['z'] == 270:
+        return True
+
+    if key == 'hand-left' and part['z'] == 270:
+        return True
+
+    if key == 'shoulder-left' and part['z'] == 0:
+        return True
+
+    return False
+
+
 if __name__ == "__main__":
-    inventoryPath = fullPath('inventory.json')
+    inventoryPath = fullPath('inventory-xlate.json')
+
+    translatePart(inventoryPath, zyyz, 786 - 809, 0)
