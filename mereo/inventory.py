@@ -48,8 +48,12 @@ class Inventory(object):
         try:
             with open(filename, 'r') as f:
                 d = json.load(f)
-            for k, v in d.items():
-                instance.inv[k] = v
+            for key, parts in d.items():
+                for pid, a in parts.items():
+                    tokens = pid.split('_')
+                    part = Part(a['d'])
+                    part.ID = tokens
+                    instance._mergePart(key, part)
         except IOError:
             pass
 
