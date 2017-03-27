@@ -10,7 +10,7 @@ class Inventory(object):
 
     def __init__(self):
         from collections import defaultdict
-        self.inv = defaultdict(list)
+        self.inv = defaultdict(dict)
 
     def __len__(self):
         return len(self.inv)
@@ -18,8 +18,14 @@ class Inventory(object):
     def __iter__(self):
         for key in ORDER:
             if key in self.inv:
-                for part in self.inv[key]:
+                for part in self.inv[key].values():
                     yield key, part
+
+    # -------------------------------------------------------------------------
+    # Non-fluent methods
+
+    def _mergePart(self, key, part):
+        self.inv[key][part.ID] = part
 
     # -------------------------------------------------------------------------
     # I/O
@@ -59,7 +65,7 @@ class Inventory(object):
                 tokens = a['id'].split('_')
                 part = Part(a['d'])
                 part.ID = tokens[1:]
-                self.inv[tokens[0]].append(part)
+                self._mergePart(tokens[0], part)
 
         return self
 
@@ -102,6 +108,11 @@ class Inventory(object):
 
     # -------------------------------------------------------------------------
     # Actions
+
+    def merge(self, other):
+        for key, part in other:
+            self._mergePart(key, part)
+        return self
 
     def quantize(self):
         for _, part in self:
