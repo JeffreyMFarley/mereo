@@ -30,17 +30,17 @@ class Part(dict):
     # -------------------------------------------------------------------------
     # Non-fluent functions
 
-    def extractAnnotations(self, annotations):
-        for annot in annotations:
+    def parseID(self, tokens):
+        for token in tokens:
             for dim in ['x', 'y', 'z']:
-                if dim in annot:
+                if dim in token:
                     try:
-                        self[dim] = int(annot[1:])
+                        self[dim] = int(token[1:])
                     except:
-                        self['other'] = annot
+                        self['other'] = token
         return self
 
-    def annotation(self):
+    def formatAsID(self):
         s = '_'.join([
             '{}{}'.format(k, self[k]) for k in ['x', 'y', 'z'] if self[k]
         ])

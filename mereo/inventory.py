@@ -56,10 +56,10 @@ class Inventory(object):
 
         for i, a in enumerate(attributes):
             if 'id' in a:
-                annotations = a['id'].split('_')
+                tokens = a['id'].split('_')
                 part = Part(a['d'])
-                part.extractAnnotations(annotations[1:])
-                self.inv[annotations[0]].append(part)
+                part.parseID(tokens[1:])
+                self.inv[tokens[0]].append(part)
 
         return self
 
@@ -77,7 +77,7 @@ class Inventory(object):
             path = parse_path(part['d'])
             paths.append(path)
             att = {
-                'id': key + part.annotation(),
+                'id': key + part.formatAsID(),
                 'stroke-width': 2,
                 'stroke':  '#ff0000',  # encodeColor(key, part),
                 'fill': 'none',
