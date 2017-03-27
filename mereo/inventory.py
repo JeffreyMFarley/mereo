@@ -2,6 +2,16 @@ from mereo import ORDER
 from mereo.part import Part
 
 
+def encodeColor(key, part):
+    rgb = [255, 16, 16]
+    rgb[0] -= ORDER.index(key) + 1
+    rgb[1] -= (part['y'] / 30)
+    rgb[2] -= (part['z'] / 30)
+
+    asHex = '#{0:02x}{1:02x}{2:02x}'.format(*rgb)
+    return asHex
+
+
 class Inventory(object):
     """implemented as a fluent interface"""
 
@@ -85,7 +95,7 @@ class Inventory(object):
             att = {
                 'id': key + part.ID,
                 'stroke-width': 2,
-                'stroke':  '#ff0000',  # encodeColor(key, part),
+                'stroke':  encodeColor(key, part),
                 'fill': 'none',
                 'opacity': 1
             }
