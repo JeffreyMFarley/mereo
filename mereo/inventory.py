@@ -120,6 +120,13 @@ class Inventory(object):
                 clone._mergePart(key, part)
         return clone
 
+    def selectPose(self, partList):
+        clone = Inventory()
+        for key, part in self:
+            if key + part.ID in partList:
+                clone._mergePart(key, part)
+        return clone
+
     # -------------------------------------------------------------------------
     # Actions
 
