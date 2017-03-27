@@ -1,14 +1,34 @@
+from __future__ import print_function
 from svgpathtools import parse_path, Path, Line, CubicBezier
+
+
+def formatPoint(point):
+    return '{0:10.3f}, {1:10.3f}'.format(point.real, point.imag)
 
 
 class Part(dict):
     """implemented as a fluent interface"""
+
+    # -------------------------------------------------------------------------
+    # Customization Methods
+
     def __init__(self, d):
         self['d'] = d
         self['x'] = 0
         self['y'] = 0
         self['z'] = 0
         self['other'] = ''
+
+    def __repr__(self):
+        return 'Part(\'%s\')' % self['d']
+
+    def __str__(self):
+        return ', '.join([
+            '{}={}'.format(k, self[k]) for k in ['x', 'y', 'z', 'other']
+        ])
+
+    # -------------------------------------------------------------------------
+    # Non-fluent functions
 
     def extractAnnotations(self, annotations):
         for annot in annotations:
@@ -29,14 +49,6 @@ class Part(dict):
             s += '_' + self['other'] if s else self['other']
 
         return '_' + s if s else ''
-
-    def name(self):
-        return ', '.join([
-            '{}={}'.format(k, self[k]) for k in ['x', 'y', 'z', 'other']
-        ])
-
-    def formatPoint(point):
-        return '{0:10.3f}, {1:10.3f}'.format(point.real, point.imag)
 
     # -------------------------------------------------------------------------
     # Actions
@@ -69,17 +81,17 @@ class Part(dict):
         return self
 
     def toConsole(self):
-        print(name(self))
+        print('\t', self)
         path = parse_path(self['d'])
         for seg in path:
             if isinstance(seg, Line):
-                print('\tLine',
+                print('\t\tLine',
                       formatPoint(seg.start),
                       ' ' * 22,
                       ' ' * 22,
                       formatPoint(seg.end))
             elif isinstance(seg, CubicBezier):
-                print('\tCubB',
+                print('\t\tCubB',
                       formatPoint(seg.start),
                       formatPoint(seg.control1),
                       formatPoint(seg.control2),
