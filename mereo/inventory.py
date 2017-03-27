@@ -113,7 +113,7 @@ class Inventory(object):
         clone = Inventory()
         for key, part in self:
             if fn(key, part):
-                clone.inv[key].append(part)
+                clone._mergePart(key, part)
         return clone
 
     # -------------------------------------------------------------------------
