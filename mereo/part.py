@@ -28,19 +28,10 @@ class Part(dict):
         ])
 
     # -------------------------------------------------------------------------
-    # Non-fluent functions
+    # Properties
 
-    def parseID(self, tokens):
-        for token in tokens:
-            for dim in ['x', 'y', 'z']:
-                if dim in token:
-                    try:
-                        self[dim] = int(token[1:])
-                    except:
-                        self['other'] = token
-        return self
-
-    def formatAsID(self):
+    @property
+    def ID(self):
         s = '_'.join([
             '{}{}'.format(k, self[k]) for k in ['x', 'y', 'z'] if self[k]
         ])
@@ -49,6 +40,17 @@ class Part(dict):
             s += '_' + self['other'] if s else self['other']
 
         return '_' + s if s else ''
+
+    @ID.setter
+    def ID(self, tokens):
+        for token in tokens:
+            for dim in ['x', 'y', 'z']:
+                if dim in token:
+                    try:
+                        self[dim] = int(token[1:])
+                    except:
+                        self['other'] = token
+        return self
 
     # -------------------------------------------------------------------------
     # Actions
