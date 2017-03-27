@@ -1,6 +1,4 @@
-from __future__ import print_function
 import os
-import sys
 from mereo.inventory import Inventory
 
 
@@ -12,32 +10,41 @@ def fullPath(fileName):
 
 
 # -----------------------------------------------------------------------------
-# Inventory -> SVG
-
-def encodeColor(key, part):
-    rgb = [255, 16, 16]
-    rgb[0] -= ORDER.index(key) + 1
-    rgb[1] -= (part['y'] / 30)
-    rgb[2] -= (part['z'] / 30)
-
-    asHex = '#{0:02x}{1:02x}{2:02x}'.format(*rgb)
-    return asHex
-
-
-# -----------------------------------------------------------------------------
 # Main
 
-def zyyz(key, part):
-    if key == 'lower-arm-left' and part['z'] == 270:
-        return True
+pose_z0 = [
+    'foot-left',
+    'foot-right',
+    'hand-left_y90_splayed',
+    'hand-right_z90',
+    'hips',
+    'lower-arm-left_y90',
+    'lower-arm-right_z90',
+    'lower-leg-left',
+    'lower-leg-right',
+    'shoulder-left_y90',
+    'shoulder-right',
+    'trunk',
+    'upper-arm-left_y90',
+    'upper-arm-right_z90',
+    'upper-leg-left',
+    'upper-leg-right'
+]
 
-    if key == 'upper-arm-left' and part['z'] == 270:
-        return True
+pose_z270 = [
+    'foot-left_z270',
+    'hips_z270',
+    'lower-arm-left_z180',
+    'lower-leg-left_z270',
+    'shoulder-left_z270',
+    'trunk_z270',
+    'upper-arm-left_z180',
+    'upper-leg-left_z270'
+]
 
-    if key == 'hand-left' and part['z'] == 270:
-        return True
 
-    if key == 'shoulder-left' and part['z'] == 0:
+def anatomical(key, part):
+    if part['y'] == 0:
         return True
 
     return False
@@ -46,14 +53,25 @@ def zyyz(key, part):
 if __name__ == "__main__":
     inventoryPath = fullPath('inventory.json')
 
-    inv = Inventory().\
-        updateFromSvg(fullPath('Bernard Z0.svg')).\
-        updateFromSvg(fullPath('Bernard Z270.svg')).\
-        updateFromSvg(fullPath('Bernard Z0 - Left Arms Y0.svg')).\
-        quantize().\
-        save(fullPath('inv-fluent.json')).\
-        writeSvg(fullPath('inv-fluent.svg'))
+    # inv = Inventory().\
+    #     updateFromSvg(fullPath('Bernard Z0.svg')).\
+    #     updateFromSvg(fullPath('Bernard Z270.svg')).\
+    #     quantize()
 
-    left_arm = inv.select(zyyz).translate(786 - 809, 2).\
-        save(fullPath('left_arm.json')).\
-        writeSvg(fullPath('left_arm.svg'))
+    # left_arm = Inventory().\
+    #     updateFromSvg(fullPath('Bernard Z0 - Left Arms Y0.svg')).\
+    #     quantize().\
+    #     translate(786 - 809, 2)
+
+    # inv.merge(left_arm).\
+    #     save(inventoryPath).\
+    #     select(anatomical).\
+    #     writeSvg(fullPath('ready.svg'))
+
+    inv = Inventory().load(inventoryPath).\
+        selectPose(pose_z0 + pose_z270).\
+        writeSvg(fullPath('ready.svg'))
+
+    inv = Inventory().load(inventoryPath).\
+        select(anatomical).\
+        writeSvg(fullPath('quantized0.svg'))
