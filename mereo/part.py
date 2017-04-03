@@ -105,23 +105,6 @@ class Part(dict):
 
     def translate(self, x, y):
         path = parse_path(self['d'])
-        newPath = Path()
-        for seg in path:
-            if isinstance(seg, Line):
-                newSeg = Line(
-                    complex(seg.start.real + x, seg.start.imag + y),
-                    complex(seg.end.real + x, seg.end.imag + y)
-                )
-                newPath.append(newSeg)
-
-            elif isinstance(seg, CubicBezier):
-                newSeg = CubicBezier(
-                    complex(seg.start.real + x, seg.start.imag + y),
-                    complex(seg.control1.real + x, seg.control1.imag + y),
-                    complex(seg.control2.real + x, seg.control2.imag + y),
-                    complex(seg.end.real + x, seg.end.imag + y)
-                )
-                newPath.append(newSeg)
-
+        newPath = path.translated(complex(x, y))
         self['d'] = newPath.d()
         return self
