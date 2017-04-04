@@ -1,3 +1,4 @@
+from __future__ import print_function
 from mereo import ORDER
 from mereo.part import Part
 
@@ -20,6 +21,22 @@ class Inventory(object):
             if key in self.inv:
                 for part in self.inv[key].values():
                     yield key, part
+
+    # -------------------------------------------------------------------------
+    # Properties
+
+    @property
+    def xMajor(self):
+        return [
+            141, 245, 349, 452, 556, 660, 764, 868, 972, 1076, 1180, 1284,
+            1388, 1492, 1596, 1700, 1804, 1908
+        ]
+
+    @property
+    def yMajor(self):
+        return [
+            100, 204, 308, 412, 516, 620, 724, 828, 932, 1036, 1140, 1244, 1348
+        ]
 
     # -------------------------------------------------------------------------
     # Non-fluent methods
@@ -101,6 +118,35 @@ class Inventory(object):
     def quantize(self):
         for _, part in self:
             part.quantize()
+        return self
+
+    def snap(self, threshold):
+        from hew import KDTree
+
+        tics = 5
+
+        xcells = list(self.xMajor)
+        for i in range(len(self.xMajor) - 1):
+            dx = float(self.xMajor[i+1] - self.xMajor[i]) / tics
+            for xx in range(1, tics):
+                xcells.append(xx * dx + self.xMajor[i])
+
+        ycells = list(self.yMajor)
+        for i in range(len(self.yMajor) - 1):
+            dy = float(self.yMajor[i+1] - self.yMajor[i]) / tics
+            for yy in range(1, tics):
+                ycells.append(yy * dy + self.yMajor[i])
+
+        pairs = []
+        for x in xcells:
+            for y in ycells:
+                pairs.append(([x, y], []))
+
+        tree = KDTree(pairs)
+
+        for key, part in self:
+            part.snap(tree, threshold)
+
         return self
 
     def toConsole(self):

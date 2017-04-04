@@ -5,3 +5,4 @@ numpy
 svgwrite
 svgpathtools
 configargparse
+git+git://github.com/JeffreyMFarley/hew.git

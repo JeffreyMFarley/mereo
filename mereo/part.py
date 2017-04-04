@@ -82,6 +82,33 @@ class Part(dict):
         self['d'] = newPath.d()
         return self
 
+    def snap(self, tree, threshold):
+        def process(points):
+            for i, p in enumerate(points):
+                best, _, dist = tree.nearest_neighbor([p.real, p.imag])
+
+                if dist < threshold:
+                    points[i] = complex(best[0], best[1])
+            return points
+
+        path = parse_path(self['d'])
+        newPath = Path()
+        for seg in path:
+            points = process([seg.start, seg.end])
+
+            if isinstance(seg, Line):
+                newSeg = Line(*points)
+                newPath.append(newSeg)
+
+            elif isinstance(seg, CubicBezier):
+                newSeg = CubicBezier(
+                    points[0], seg.control1, seg.control2, points[1]
+                )
+                newPath.append(newSeg)
+
+        self['d'] = newPath.d()
+        return self
+
     def toConsole(self):
         print('\t', self)
         path = parse_path(self['d'])

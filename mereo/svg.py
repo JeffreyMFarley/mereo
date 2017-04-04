@@ -30,14 +30,7 @@ class Svg(object):
         self.attributes.append(attribute)
 
     def _tryGetGrids(self):
-        xMajor = [
-            141, 245, 349, 452, 556, 660, 764, 868, 972, 1076, 1180, 1284,
-            1388, 1492, 1596, 1700, 1804, 1908
-        ]
-        yMajor = [
-            100, 204, 308, 412, 516, 620, 724, 828, 932, 1036, 1140, 1244, 1348
-        ]
-        return xMajor, yMajor
+        return self.inventory.xMajor, self.inventory.yMajor
 
     # -------------------------------------------------------------------------
     # Fluent Methods
