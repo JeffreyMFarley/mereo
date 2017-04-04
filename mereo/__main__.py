@@ -1,5 +1,6 @@
 import os
 from mereo.inventory import Inventory
+from mereo.svg import Svg
 
 
 # -----------------------------------------------------------------------------
@@ -44,7 +45,7 @@ pose_z270 = [
 
 
 def anatomical(key, part):
-    if part['y'] == 0:
+    if part['y'] == 0 and part['z'] == 0:
         return True
 
     return False
@@ -54,24 +55,21 @@ if __name__ == "__main__":
     inventoryPath = fullPath('inventory.json')
 
     # inv = Inventory().\
-    #     updateFromSvg(fullPath('Bernard Z0.svg')).\
-    #     updateFromSvg(fullPath('Bernard Z270.svg')).\
-    #     quantize()
-
-    # left_arm = Inventory().\
-    #     updateFromSvg(fullPath('Bernard Z0 - Left Arms Y0.svg')).\
+    #     updateFromSvg(fullPath('bar.svg')).\
     #     quantize().\
-    #     translate(786 - 809, 2)
-
-    # inv.merge(left_arm).\
-    #     save(inventoryPath).\
-    #     select(anatomical).\
-    #     writeSvg(fullPath('ready.svg'))
+    #     translate(786 - 809, 2).\
+    #     selectPose(pose_z0).\
+    #     save(fullPath('foo.json')).\
 
     inv = Inventory().load(inventoryPath).\
-        selectPose(pose_z0 + pose_z270).\
-        writeSvg(fullPath('ready.svg'))
+        select(anatomical)
 
-    inv = Inventory().load(inventoryPath).\
-        select(anatomical).\
-        writeSvg(fullPath('quantized0.svg'))
+    svg = Svg(inv).showGrid().\
+        write(fullPath('step0.svg')).\
+        showBoundingBoxes().\
+        write(fullPath('step1.svg')).\
+        showParts().\
+        write(fullPath('step2.svg')).\
+        clear().\
+        showParts().\
+        write(fullPath('step3.svg'))
