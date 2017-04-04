@@ -107,7 +107,7 @@ class Inventory(object):
         for key in ORDER:
             if key in self.inv:
                 print(key)
-                for part in self.inv[key]:
+                for part in self.inv[key].values():
                     part.toConsole()
         return self
 
