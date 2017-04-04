@@ -29,6 +29,16 @@ class Svg(object):
         self.paths.append(parse_path(pathAsString))
         self.attributes.append(attribute)
 
+    def _tryGetGrids(self):
+        xMajor = [
+            141, 245, 349, 452, 556, 660, 764, 868, 972, 1076, 1180, 1284,
+            1388, 1492, 1596, 1700, 1804, 1908
+        ]
+        yMajor = [
+            100, 204, 308, 412, 516, 620, 724, 828, 932, 1036, 1140, 1244, 1348
+        ]
+        return xMajor, yMajor
+
     # -------------------------------------------------------------------------
     # Fluent Methods
 
@@ -36,39 +46,49 @@ class Svg(object):
         self.paths = []
         self.attributes = []
         self.svg_attributes = {
-            'width': 2000,
-            'height': 1800
+            'size': ('2000', '1800')
         }
         return self
 
     def showGrid(self):
-        style = {
+        majorStyle = {
+            'stroke-width': 2,
+            'stroke':  '#999999',
+            'fill': 'none',
+            'opacity': .3
+        }
+        minorStyle = {
             'stroke-width': 1,
-            'stroke':  '#330033',
+            'stroke':  '#999999',
             'fill': 'none',
             'opacity': .3
         }
 
-        xMajor = [
-            142, 245, 348, 451, 554, 658, 762, 866, 970, 1074, 1179, 1283,
-            1386, 1490, 1594, 1697, 1802, 1905
-        ]
-        yMajor = [
-            100, 203, 306, 409, 512, 616, 720, 824, 928, 1032, 1137, 1241,
-            1344
-        ]
+        xMajor, yMajor = self._tryGetGrids()
+        tics = 5
 
         s = ''
         for x in xMajor:
             s += 'M {0},{1} L{0},{2} '.format(x, yMajor[0], yMajor[-1])
-
-        self._add(s, style)
-
-        s = ''
         for y in yMajor:
             s += 'M {1},{0} L{2},{0} '.format(y, xMajor[0], xMajor[-1])
+        self._add(s, majorStyle)
 
-        self._add(s, style)
+        s = ''
+        for i in range(len(xMajor) - 1):
+            dx = float(xMajor[i+1] - xMajor[i]) / tics
+            for xx in range(1, tics):
+                s += 'M {0},{1} L{0},{2} '.format(
+                    xx * dx + xMajor[i], yMajor[0], yMajor[-1]
+                )
+        for i in range(len(yMajor) - 1):
+            dy = float(yMajor[i+1] - yMajor[i]) / tics
+            for yy in range(1, tics):
+                s += 'M {1},{0} L{2},{0} '.format(
+                    yy * dy + yMajor[i], xMajor[0], xMajor[-1]
+                )
+
+        self._add(s, minorStyle)
 
         return self
 
