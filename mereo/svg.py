@@ -3,10 +3,10 @@ from svgpathtools import wsvg, parse_path
 
 
 def encodeColor(key, part):
-    rgb = [255, 16, 16]
+    rgb = [255, 24, 24]
     rgb[0] -= ORDER.index(key) + 1
-    rgb[1] -= (part['y'] / 30)
-    rgb[2] -= (part['z'] / 30)
+    rgb[1] -= (part['y'] / 15)
+    rgb[2] -= (part['z'] / 15)
 
     asHex = '#{0:02x}{1:02x}{2:02x}'.format(*rgb)
     return asHex
