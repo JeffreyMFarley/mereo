@@ -1,4 +1,5 @@
 import os
+from mereo.in_betweens import generateInBetweens
 from mereo.inventory import Inventory
 from mereo.svg import Svg
 
@@ -12,6 +13,25 @@ def fullPath(fileName):
 
 # -----------------------------------------------------------------------------
 # Main
+
+pose_neutral = [
+    'foot-left',
+    'foot-right',
+    'hand-left_z270',
+    'hand-right_z90',
+    'hips',
+    'lower-arm-left_z270',
+    'lower-arm-right_z90',
+    'lower-leg-left',
+    'lower-leg-right',
+    'shoulder-left',
+    'shoulder-right',
+    'trunk',
+    'upper-arm-left_z270',
+    'upper-arm-right_z90',
+    'upper-leg-left',
+    'upper-leg-right'
+]
 
 pose_z0 = [
     'foot-left',
@@ -54,22 +74,20 @@ def anatomical(key, part):
 if __name__ == "__main__":
     inventoryPath = fullPath('inventory.json')
 
-    # inv = Inventory().\
-    #     updateFromSvg(fullPath('bar.svg')).\
-    #     quantize().\
-    #     translate(786 - 809, 2).\
-    #     selectPose(pose_z0).\
-    #     save(fullPath('foo.json')).\
-
     inv = Inventory().load(inventoryPath).\
-        select(anatomical)
+        selectPose(pose_neutral + pose_z270)
+
+    parts = generateInBetweens(
+        inv.selectPose(pose_neutral), inv.selectPose(pose_z270), 1
+    )
+
+    inv.merge(parts)
 
     svg = Svg(inv).showGrid().\
-        write(fullPath('step0.svg')).\
-        showBoundingBoxes().\
-        write(fullPath('step1.svg')).\
         showParts().\
-        write(fullPath('step2.svg')).\
-        clear().\
-        showParts().\
-        write(fullPath('step3.svg'))
+        write(fullPath('foo.svg'))
+    # inv.snap(8)
+    # svg.clear().showGrid().\
+    #     showParts().\
+    #     write(fullPath('bar.svg'))
+    # inv.save(fullPath('tighten.json'))

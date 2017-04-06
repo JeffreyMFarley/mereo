@@ -1,4 +1,3 @@
-from __future__ import print_function
 from mereo import ORDER
 from mereo.part import Part
 
@@ -41,7 +40,7 @@ class Inventory(object):
     # -------------------------------------------------------------------------
     # Non-fluent methods
 
-    def _mergePart(self, key, part):
+    def addPart(self, key, part):
         self.inv[key][part.ID] = part
 
     # -------------------------------------------------------------------------
@@ -60,7 +59,7 @@ class Inventory(object):
                     tokens = pid.split('_')
                     part = Part(a['d'])
                     part.ID = tokens
-                    instance._mergePart(key, part)
+                    instance.addPart(key, part)
         except IOError:
             pass
 
@@ -86,7 +85,7 @@ class Inventory(object):
                 tokens = a['id'].split('_')
                 part = Part(a['d'])
                 part.ID = tokens[1:]
-                self._mergePart(tokens[0], part)
+                self.addPart(tokens[0], part)
 
         return self
 
@@ -97,14 +96,14 @@ class Inventory(object):
         clone = Inventory()
         for key, part in self:
             if fn(key, part):
-                clone._mergePart(key, part)
+                clone.addPart(key, part)
         return clone
 
     def selectPose(self, partList):
         clone = Inventory()
         for key, part in self:
             if key + part.ID in partList:
-                clone._mergePart(key, part)
+                clone.addPart(key, part)
         return clone
 
     # -------------------------------------------------------------------------
@@ -112,7 +111,7 @@ class Inventory(object):
 
     def merge(self, other):
         for key, part in other:
-            self._mergePart(key, part)
+            self.addPart(key, part)
         return self
 
     def quantize(self):
